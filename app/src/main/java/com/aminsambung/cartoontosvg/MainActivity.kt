@@ -184,7 +184,7 @@ class MainActivity : Activity() {
     private fun makeBlackWhite(
         source: Bitmap
     ): Bitmap {
-        val maxSize = 800
+        val maxSize = 3200
 
         val scale = minOf(
             1f,
