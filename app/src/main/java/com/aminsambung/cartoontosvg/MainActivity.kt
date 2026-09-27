@@ -15,6 +15,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import kotlin.math.abs
 
 class MainActivity : Activity() {
 
@@ -65,11 +66,19 @@ class MainActivity : Activity() {
         }
 
         addButton(layout, "Hitam Putih") {
-            originalBitmap?.let {
-                resultBitmap = makeBlackWhite(it)
-                imageView.setImageBitmap(resultBitmap)
-                showMessage("Gambar berhasil diubah")
-            } ?: showMessage("Pilih gambar terlebih dahulu")
+            val source = originalBitmap
+
+            if (source == null) {
+                showMessage("Pilih gambar terlebih dahulu")
+            } else {
+                try {
+                    resultBitmap = makeBlackWhite(source)
+                    imageView.setImageBitmap(resultBitmap)
+                    showMessage("Gambar berhasil diubah")
+                } catch (e: Exception) {
+                    showMessage("Gagal mengubah gambar")
+                }
+            }
         }
 
         addButton(layout, "Simpan SVG") {
@@ -79,10 +88,14 @@ class MainActivity : Activity() {
                 showMessage("Pilih gambar terlebih dahulu")
             } else {
                 try {
-                    val blackWhite = resultBitmap ?: makeBlackWhite(source)
+                    val blackWhite =
+                        resultBitmap ?: makeBlackWhite(source)
+
                     pendingSvg = bitmapToSvg(blackWhite)
 
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    val intent = Intent(
+                        Intent.ACTION_CREATE_DOCUMENT
+                    ).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "image/svg+xml"
                         putExtra(
@@ -119,35 +132,47 @@ class MainActivity : Activity() {
         resultCode: Int,
         data: Intent?
     ) {
-        super.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(
+            requestCode,
+            resultCode,
+            data
+        )
 
         if (requestCode == 100 &&
             resultCode == RESULT_OK &&
             data?.data != null
         ) {
             try {
-                val uri: Uri = data.data!!
+                val uri = data.data!!
+
                 contentResolver.openInputStream(uri).use {
-                    originalBitmap = BitmapFactory.decodeStream(it)
+                    originalBitmap =
+                        BitmapFactory.decodeStream(it)
                 }
 
                 resultBitmap = null
                 imageView.setImageBitmap(originalBitmap)
                 showMessage("Gambar berhasil dipilih")
+
             } catch (e: Exception) {
                 showMessage("Gagal membuka gambar")
             }
         }
 
-        if (requestCode == 101 && resultCode == RESULT_OK) {
+        if (requestCode == 101 &&
+            resultCode == RESULT_OK
+        ) {
             val uri = data?.data
             val svg = pendingSvg
 
             if (uri != null && svg != null) {
                 try {
                     contentResolver.openOutputStream(uri).use {
-                        it?.write(svg.toByteArray(Charsets.UTF_8))
+                        it?.write(
+                            svg.toByteArray(Charsets.UTF_8)
+                        )
                     }
+
                     showMessage("SVG berhasil disimpan")
                 } catch (e: Exception) {
                     showMessage("Gagal menyimpan SVG")
@@ -156,61 +181,151 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun makeBlackWhite(source: Bitmap): Bitmap {
-        val width = source.width
-        val height = source.height
+    private fun makeBlackWhite(
+        source: Bitmap
+    ): Bitmap {
+        val maxSize = 800
 
-        val output = Bitmap.createBitmap(
-            width, height, Bitmap.Config.ARGB_8888
-        )
-
-        val pixels = IntArray(width * height)
-        source.getPixels(
-            pixels, 0, width, 0, 0, width, height
-        )
-
-        for (i in pixels.indices) {
-            val color = pixels[i]
-            val gray = (
-                Color.red(color) * 0.299 +
-                Color.green(color) * 0.587 +
-                Color.blue(color) * 0.114
-            ).toInt()
-
-            pixels[i] = if (gray < 160) {
-                Color.BLACK
-            } else {
-                Color.WHITE
-            }
-        }
-
-        output.setPixels(
-            pixels, 0, width, 0, 0, width, height
-        )
-        return output
-    }
-
-    private fun bitmapToSvg(source: Bitmap): String {
-        val maxSize = 400
         val scale = minOf(
             1f,
             maxSize.toFloat() / source.width,
             maxSize.toFloat() / source.height
         )
 
-        val width = (source.width * scale).toInt().coerceAtLeast(1)
-        val height = (source.height * scale).toInt().coerceAtLeast(1)
+        val width =
+            (source.width * scale).toInt().coerceAtLeast(1)
+        val height =
+            (source.height * scale).toInt().coerceAtLeast(1)
 
         val bitmap = if (
-            width != source.width || height != source.height
+            width != source.width ||
+            height != source.height
         ) {
-            Bitmap.createScaledBitmap(source, width, height, true)
+            Bitmap.createScaledBitmap(
+                source,
+                width,
+                height,
+                true
+            )
+        } else {
+            source
+        }
+
+        val gray = IntArray(width * height)
+        val pixels = IntArray(width * height)
+
+        bitmap.getPixels(
+            pixels,
+            0,
+            width,
+            0,
+            0,
+            width,
+            height
+        )
+
+        for (i in pixels.indices) {
+            val c = pixels[i]
+
+            gray[i] = (
+                Color.red(c) * 0.299 +
+                Color.green(c) * 0.587 +
+                Color.blue(c) * 0.114
+            ).toInt()
+        }
+
+        val result = IntArray(width * height)
+        java.util.Arrays.fill(result, Color.WHITE)
+
+        // Ambang deteksi tepi yang telah dinaikkan.
+        val threshold = 500
+
+        for (y in 1 until height - 1) {
+            for (x in 1 until width - 1) {
+                val i = y * width + x
+
+                val gx =
+                    -gray[i - width - 1] +
+                    gray[i - width + 1] -
+                    2 * gray[i - 1] +
+                    2 * gray[i + 1] -
+                    gray[i + width - 1] +
+                    gray[i + width + 1]
+
+                val gy =
+                    -gray[i - width - 1] -
+                    2 * gray[i - width] -
+                    gray[i - width + 1] +
+                    gray[i + width - 1] +
+                    2 * gray[i + width] +
+                    gray[i + width + 1]
+
+                if (abs(gx) + abs(gy) > threshold) {
+                    result[i] = Color.BLACK
+                }
+            }
+        }
+
+        val output = Bitmap.createBitmap(
+            width,
+            height,
+            Bitmap.Config.ARGB_8888
+        )
+
+        output.setPixels(
+            result,
+            0,
+            width,
+            0,
+            0,
+            width,
+            height
+        )
+
+        return output
+    }
+
+    private fun bitmapToSvg(
+        source: Bitmap
+    ): String {
+        val maxSize = 400
+
+        val scale = minOf(
+            1f,
+            maxSize.toFloat() / source.width,
+            maxSize.toFloat() / source.height
+        )
+
+        val width =
+            (source.width * scale).toInt().coerceAtLeast(1)
+        val height =
+            (source.height * scale).toInt().coerceAtLeast(1)
+
+        val bitmap = if (
+            width != source.width ||
+            height != source.height
+        ) {
+            Bitmap.createScaledBitmap(
+                source,
+                width,
+                height,
+                true
+            )
         } else {
             source
         }
 
         val pixels = IntArray(width * height)
-        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+
+        bitmap.getPixels(
+            pixels,
+            0,
+            width,
+            0,
+            0,
+            width,
+            height
+        )
 
         val path = StringBuilder()
 
@@ -219,8 +334,7 @@ class MainActivity : Activity() {
 
             for (x in 0..width) {
                 val isBlack = if (x < width) {
-                    val color = pixels[y * width + x]
-                    Color.red(color) < 128
+                    Color.red(pixels[y * width + x]) < 128
                 } else {
                     false
                 }
@@ -253,15 +367,22 @@ class MainActivity : Activity() {
                  width="$width"
                  height="$height"
                  viewBox="0 0 $width $height">
-                <rect width="100%" height="100%" fill="white"/>
-                <path d="$path" fill="black"/>
+                <rect
+                    width="100%"
+                    height="100%"
+                    fill="white"/>
+                <path
+                    d="$path"
+                    fill="black"/>
             </svg>
         """.trimIndent()
     }
 
     private fun showMessage(message: String) {
         Toast.makeText(
-            this, message, Toast.LENGTH_SHORT
+            this,
+            message,
+            Toast.LENGTH_SHORT
         ).show()
     }
 }
