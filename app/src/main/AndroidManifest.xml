@@ -1,36 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.edgeglow">
 
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"/>
+    <!-- ==================== IZIN ==================== -->
+
+    <!-- Overlay di atas aplikasi lain -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Foreground service (Android 9+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Foreground service tipe specialUse (Android 14+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!-- Notifikasi (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Notification Listener (dideklarasikan di service, bukan uses-permission) -->
+
+    <!-- Deteksi panggilan masuk (opsional, untuk fitur call glow) -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- Agar service tetap hidup saat reboot (opsional) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Cek status layar (agar glow tidak muncul saat layar mati) -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- ==================== APLIKASI ==================== -->
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="EdgeGlow"
-        android:theme="@style/Theme.AppCompat">
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat"
+        tools:targetApi="34">
 
-        <activity android:name=".MainActivity"
-            android:exported="true">
+        <!-- ========== ACTIVITY UTAMA ========== -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- ========== NOTIFICATION LISTENER SERVICE ========== -->
         <service
             android:name=".NotificationListener"
             android:label="EdgeGlow Notification Listener"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService"/>
+                <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
 
+        <!-- ========== EDGE GLOW OVERLAY SERVICE ========== -->
         <service
             android:name=".EdgeGlowService"
-            android:exported="false"/>
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="overlay_notification_light" />
+        </service>
+
+        <!-- ========== BOOT RECEIVER (opsional) ========== -->
+        <!-- Aktifkan jika ingin service otomatis jalan setelah reboot -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>
