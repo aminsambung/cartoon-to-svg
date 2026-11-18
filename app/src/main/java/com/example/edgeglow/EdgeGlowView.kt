@@ -21,6 +21,8 @@ class EdgeGlowView(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        if (width == 0 || height == 0) return
+
         rect.set(
             strokeWidth / 2,
             strokeWidth / 2,
@@ -28,19 +30,19 @@ class EdgeGlowView(context: Context) : View(context) {
             height - strokeWidth / 2
         )
 
-        // Efek glow bertingkat
         for (i in 3 downTo 1) {
             paint.color = glowColor
             paint.alpha = (alphaValue / i)
             paint.strokeWidth = strokeWidth * i
-            paint.maskFilter = BlurMaskFilter(strokeWidth * i, BlurMaskFilter.Blur.NORMAL)
-            canvas.drawRoundRect(rect, 30f, 30f, paint)
+            paint.maskFilter = BlurMaskFilter(strokeWidth * i, BlurMaskFilter.Blur.SOLID)
+            canvas.drawRoundRect(rect, 30f, 30f, paint) // Radius diperkecil untuk preview
         }
     }
 
     fun startGlow(color: Int = Color.CYAN, duration: Long = 3000) {
         glowColor = color
         animator?.cancel()
+        
         animator = ValueAnimator.ofInt(0, 255, 255, 0).apply {
             this.duration = duration
             interpolator = LinearInterpolator()
