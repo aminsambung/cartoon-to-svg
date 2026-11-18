@@ -11,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginBottom="32dp"
-        android:background="#222222"
-        android:clipChildren="false">
+        android:background="#222222">
 
         <!-- Ini adalah View kustom kita -->
         <com.example.edgeglow.EdgeGlowView
@@ -39,7 +38,6 @@
         android:layout_height="wrap_content"
         android:text="2. Izinkan Akses Notifikasi"/>
 
-    <!-- Ganti fungsinya menjadi pemicu preview -->
     <Button android:id="@+id/btnTest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
