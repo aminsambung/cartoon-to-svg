@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CartoonToSVG"
+rootProject.name = "EdgeGlow"
 include(":app")
