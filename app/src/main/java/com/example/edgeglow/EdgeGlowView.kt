@@ -8,8 +8,11 @@ import android.view.animation.LinearInterpolator
 
 class EdgeGlowView(context: Context) : View(context) {
 
-    private var glowColor = Color.CYAN
-    private var strokeWidth = 24f
+    // Warna default diubah menjadi MERAH terang
+    private var glowColor = Color.RED 
+    
+    // Ketebalan diperbesar
+    private var strokeWidth = 50f 
     private var alphaValue = 0
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -21,8 +24,10 @@ class EdgeGlowView(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        
         if (width == 0 || height == 0) return
 
+        // Area gambar
         rect.set(
             strokeWidth / 2,
             strokeWidth / 2,
@@ -30,16 +35,17 @@ class EdgeGlowView(context: Context) : View(context) {
             height - strokeWidth / 2
         )
 
+        // Gambar 3 lapis efek glow
         for (i in 3 downTo 1) {
             paint.color = glowColor
-            paint.alpha = (alphaValue / i)
+            paint.alpha = (alphaValue / i) 
             paint.strokeWidth = strokeWidth * i
             paint.maskFilter = BlurMaskFilter(strokeWidth * i, BlurMaskFilter.Blur.SOLID)
-            canvas.drawRoundRect(rect, 30f, 30f, paint) // Radius diperkecil untuk preview
+            canvas.drawRoundRect(rect, 60f, 60f, paint)
         }
     }
 
-    fun startGlow(color: Int = Color.CYAN, duration: Long = 3000) {
+    fun startGlow(color: Int = Color.RED, duration: Long = 4000) {
         glowColor = color
         animator?.cancel()
         
@@ -48,7 +54,7 @@ class EdgeGlowView(context: Context) : View(context) {
             interpolator = LinearInterpolator()
             addUpdateListener {
                 alphaValue = it.animatedValue as Int
-                invalidate()
+                invalidate() 
             }
             start()
         }
