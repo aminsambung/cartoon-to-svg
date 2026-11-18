@@ -6,48 +6,22 @@
     android:padding="24dp"
     android:gravity="center">
 
-    <!-- KOTAK PREVIEW EFEK CAHAYA -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginBottom="32dp"
-        android:background="#222222">
-
-        <!-- Ini adalah View kustom kita -->
-        <com.example.edgeglow.EdgeGlowView
-            android:id="@+id/previewGlowView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-            
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Preview Efek"
-            android:textColor="#888888"
-            android:textSize="18sp" />
-    </FrameLayout>
-
-    <Button android:id="@+id/btnOverlay"
+    <Button 
+        android:id="@+id/btnOverlay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="1. Izinkan Overlay"/>
 
-    <Button android:id="@+id/btnNotifAccess"
+    <Button 
+        android:id="@+id/btnNotifAccess"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="2. Izinkan Akses Notifikasi"/>
 
-    <Button android:id="@+id/btnTest"
+    <Button 
+        android:id="@+id/btnTest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="3. Tes Animasi Preview (Kotak Atas)"/>
-
-    <!-- Tombol BARU untuk mengetes overlay full-screen -->
-    <Button android:id="@+id/btnTestFullScreen"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="4. Tes Overlay Full Screen (Layar Penuh)"
-        android:backgroundTint="#FF5722"/>
+        android:text="3. Tes Efek Cahaya"/>
 
 </LinearLayout>
