@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.aminsambung.cartoontosvg"
+    namespace = "com.example.edgeglow"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.aminsambung.cartoontosvg"
+        applicationId = "com.example.edgeglow"
         minSdk = 23
         targetSdk = 35
         versionCode = 1
