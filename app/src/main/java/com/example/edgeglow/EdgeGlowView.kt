@@ -9,7 +9,7 @@ import android.view.animation.LinearInterpolator
 class EdgeGlowView(context: Context) : View(context) {
 
     private var glowColor = Color.CYAN
-    private var strokeWidth = 30f
+    private var strokeWidth = 24f
     private var alphaValue = 0
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -34,7 +34,7 @@ class EdgeGlowView(context: Context) : View(context) {
             paint.alpha = (alphaValue / i)
             paint.strokeWidth = strokeWidth * i
             paint.maskFilter = BlurMaskFilter(strokeWidth * i, BlurMaskFilter.Blur.NORMAL)
-            canvas.drawRoundRect(rect, 60f, 60f, paint)
+            canvas.drawRoundRect(rect, 30f, 30f, paint)
         }
     }
 
