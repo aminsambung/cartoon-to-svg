@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.widget.Button
 import android.widget.Toast
@@ -19,54 +21,50 @@ class MainActivity : AppCompatActivity() {
         val btnOverlay = findViewById<Button>(R.id.btnOverlay)
         val btnNotifAccess = findViewById<Button>(R.id.btnNotifAccess)
         val btnTest = findViewById<Button>(R.id.btnTest)
+        val btnTestFullScreen = findViewById<Button>(R.id.btnTestFullScreen)
+        val previewGlowView = findViewById<EdgeGlowView>(R.id.previewGlowView)
 
         // 1. Tombol Izin Overlay
         btnOverlay.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
-                )
-                startActivity(intent)
-                Toast.makeText(this, "Silakan izinkan 'Display over other apps'", Toast.LENGTH_LONG).show()
+                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
             } else {
                 Toast.makeText(this, "Izin overlay sudah aktif", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // 2. Tombol Izin Akses Notifikasi
+        // 2. Tombol Izin Notifikasi
         btnNotifAccess.setOnClickListener {
-            val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-            startActivity(intent)
-            Toast.makeText(this, "Cari 'EdgeGlow' dan aktifkan", Toast.LENGTH_LONG).show()
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
 
-        // 3. Tombol Tes Efek Cahaya
+        // 3. Tombol Tes Preview (Di dalam aplikasi)
         btnTest.setOnClickListener {
-            // Cek apakah izin overlay sudah diberikan
+            previewGlowView.startGlow(Color.CYAN, 3000)
+            
+            // Buat efek berulang (breathing) selama 3 detik
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed({ previewGlowView.startGlow(Color.CYAN, 3000) }, 3200)
+        }
+
+        // 4. Tombol Tes Overlay Full Screen (Sistem)
+        btnTestFullScreen.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "GAGAL: Kamu belum memberi izin Overlay! (Klik tombol 1)", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "GAGAL: Izinkan Overlay dulu!", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
-            // Jalankan service
             try {
                 val intent = Intent(this, EdgeGlowService::class.java).apply {
                     putExtra(EdgeGlowService.EXTRA_COLOR, Color.CYAN)
-                    putExtra(EdgeGlowService.EXTRA_APP_NAME, "Tes Aplikasi")
-                    putExtra(EdgeGlowService.EXTRA_MESSAGE, "Ini adalah tes efek cahaya tepi layar")
                 }
-                
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(intent)
                 } else {
                     startService(intent)
                 }
-                
-                Toast.makeText(this, "Menjalankan efek cahaya...", Toast.LENGTH_SHORT).show()
-                
+                Toast.makeText(this, "Overlay layar penuh berjalan...", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                e.printStackTrace()
                 Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
