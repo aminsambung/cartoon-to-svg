@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 val intent = Intent(this, EdgeGlowService::class.java).apply {
-                    putExtra(EdgeGlowService.EXTRA_COLOR, Color.CYAN)
+                    putExtra(EdgeGlowService.EXTRA_COLOR, Color.RED)
                 }
                 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
