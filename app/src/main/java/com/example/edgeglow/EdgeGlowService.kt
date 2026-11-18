@@ -247,7 +247,7 @@ class EdgeGlowService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("EdgeGlow aktif")
             .setContentText("Efek cahaya tepi layar berjalan")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setOngoing(true)
             .setSilent(true)
