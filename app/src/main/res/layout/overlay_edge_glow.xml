@@ -28,7 +28,7 @@
             android:id="@+id/ivAppIcon"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@android:drawable/sym_def_app_icon" /> <!-- BAGIAN INI DIGANTI -->
 
         <LinearLayout
             android:layout_width="wrap_content"
